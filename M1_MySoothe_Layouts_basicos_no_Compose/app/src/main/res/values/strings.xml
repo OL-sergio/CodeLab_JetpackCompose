@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">MySoothe_Layouts_basicos_no_Compose</string>
+    <string name="search_placeholder">Search</string>
+    <string name="foto1">Training</string>
+    <string name="foto2">Yoga Nature</string>
+    <string name="foto3">Natural beauty</string>
+    <string name="foto4">Mountain and Yoga</string>
+    <string name="foto5">Park and Yoga</string>
+    <string name="foto6">Road and Nature\n</string>
+    <string name="f_foto1">Nature and Humans</string>
+    <string name="f_foto2">Mountains And Life</string>
+    <string name="f_foto3">Mountains Life</string>
+    <string name="f_foto4">Landscape</string>
+    <string name="f_foto5">Blue Sky</string>
+    <string name="f_foto6">Night sky</string>
+    <string name="align_your_body">Align your Body</string>
+    <string name="favorite_collections">Favorite Collections</string>
+    <string name="button_navigation_home">Home\n</string>
+    <string name="button_navigation_profile">Profile\n</string>
+</resources>
