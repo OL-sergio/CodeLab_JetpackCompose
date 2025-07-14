@@ -19,20 +19,34 @@ package com.google.samples.apps.sunflower.plantdetail
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.text.method.LinkMovementMethod
+import android.widget.ImageButton
 import android.widget.TextView
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -41,6 +55,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
@@ -66,13 +81,17 @@ import com.google.samples.apps.sunflower.theme.SunflowerTheme
 import com.google.samples.apps.sunflower.viewmodels.PlantDetailViewModel
 
 data class PlantDetailsCallbacks(
-    val onFabClick: () -> Unit
+    val onFabClick: () -> Unit,
+    val onBackClick: () -> Unit,
+    val onShareClick: (String) -> Unit
 )
 
 
 @Composable
 fun PlantDetailDescriptionScreen(
-    plantDetailViewModel: PlantDetailViewModel
+    plantDetailViewModel: PlantDetailViewModel,
+    onBackClick: () -> Unit,
+    onShareClick: (String) -> Unit,
 ) {
     val plant =  plantDetailViewModel.plant.observeAsState().value
     val isPlanted = plantDetailViewModel.isPlanted.observeAsState().value
@@ -84,6 +103,9 @@ fun PlantDetailDescriptionScreen(
                 isPlanted as Boolean,
                 PlantDetailsCallbacks(
                     onFabClick = { plantDetailViewModel.addPlantToGarden() },
+                    onBackClick = onBackClick,
+                    onShareClick = onShareClick
+
                 ),
             )
         }
@@ -97,7 +119,9 @@ fun PlantDetails(
     callbacks: PlantDetailsCallbacks,
     modifier: Modifier = Modifier,
     ) {
-    Box (modifier.fillMaxSize()){
+    Box (
+        modifier.fillMaxSize()
+    ){
         PlantDetailContent(
             plant = plant,
             isPlanted = isPlanted,
@@ -108,7 +132,13 @@ fun PlantDetails(
                 // is released
                 maxOf(candidateHeight, 1.dp)
             },
+
             onFabClick = callbacks.onFabClick,
+
+        )
+        PlantToolbar(
+           plant.name, callbacks,
+
 
         )
     }
@@ -141,6 +171,7 @@ fun PlantDetailContent(
                         onFabClick = onFabClick,
                         modifier = Modifier
                             .constrainAs(fab) {
+                                centerAround(image.bottom)
                                 absoluteRight.linkTo(
                                     parent.absoluteRight,
                                     margin = fabEndMargin
@@ -156,6 +187,7 @@ fun PlantDetailContent(
                     description = plant.description,
                     modifier = Modifier.constrainAs(info) { top.linkTo(image.bottom) }
                 )
+
             }
     }
 }
@@ -177,16 +209,18 @@ fun PlantInformation(
                         start = Dimens.PaddingSmall,
                         end = Dimens.PaddingSmall,
                         bottom = Dimens.PaddingNormal
-                    ).align(Alignment.CenterHorizontally)
+                    )
+                    .align(Alignment.CenterHorizontally)
             )
 
             Box(
-                Modifier.align(Alignment.CenterHorizontally)
+                Modifier
+                    .align(Alignment.CenterHorizontally)
                     .padding(
-                    start = Dimens.PaddingSmall,
-                    end = Dimens.PaddingSmall,
-                    bottom = Dimens.PaddingNormal
-                )
+                        start = Dimens.PaddingSmall,
+                        end = Dimens.PaddingSmall,
+                        bottom = Dimens.PaddingNormal
+                    )
             ) {
                 Column(
                     Modifier.fillMaxWidth()
@@ -211,6 +245,128 @@ fun PlantInformation(
             PlantDescription(description)
         }
 }
+@Composable
+fun PlantToolbar(
+    plantName: String,
+    callbacks: PlantDetailsCallbacks,
+
+) {
+
+    val onShareClick = {
+        callbacks.onShareClick(plantName)
+    }
+
+    PlantDetailsToolbar(
+
+        plantName = plantName,
+        onBackClick = callbacks.onBackClick,
+        onShareClick = onShareClick,
+        modifier = Modifier
+
+    )
+    PlantHeaderActions(
+
+        onBackClick = callbacks.onBackClick,
+        onShareClick = onShareClick,
+        modifier = Modifier
+
+    )
+
+
+}
+
+@Composable
+private fun PlantHeaderActions(
+
+    onBackClick: () -> Unit,
+    onShareClick: () -> Unit,
+    modifier: Modifier = Modifier
+
+) {
+    Row(
+        modifier = modifier
+            .fillMaxSize()
+            .systemBarsPadding()
+            .padding(top = Dimens.ToolbarIconPadding),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        ){
+
+        val iconModifier = Modifier
+            .sizeIn(
+                minWidth = Dimens.ToolbarIconSize,
+                minHeight = Dimens.ToolbarIconSize
+            )
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = CircleShape
+            )
+
+            IconButton (
+                onClick = onBackClick,
+                modifier = Modifier
+                    .padding(start = Dimens.ToolbarIconPadding)
+                    .then(iconModifier)
+            ){
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(id = R.string.a11y_back)
+                )
+
+            }
+
+        val shareContentDescription = stringResource(id = R.string.menu_item_share_plant)
+
+        IconButton (
+            onClick = onShareClick,
+            modifier = Modifier
+                .padding(end = Dimens.ToolbarIconPadding)
+                .then(iconModifier)
+                .semantics {
+                    contentDescription = shareContentDescription
+                }
+        ) {
+            Icon(
+                Icons.Filled.Share,
+                contentDescription = shareContentDescription
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PlantDetailsToolbar(
+    plantName: String,
+    onBackClick: () -> Unit,
+    onShareClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    Surface {
+        TopAppBar(
+                modifier = modifier
+                    .statusBarsPadding()
+                    .background(color = MaterialTheme.colorScheme.surface ),
+
+                title = {
+                    Row{
+                        IconButton(
+                            onBackClick,
+                            Modifier.align(Alignment.CenterVertically)
+                        ){
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(id = R.string.a11y_back)
+                            )
+
+                        }
+
+                    }
+                }
+            )
+        }
+    }
+
 
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -313,7 +469,7 @@ private fun PlantDetailDescriptionScreenPreview() {
             PlantDetails(
                 Plant("plantId", "Tomato", "HTML<br>description", 6),
                 true,
-                PlantDetailsCallbacks({ })
+                PlantDetailsCallbacks({ }, { }, { } )
                 )
         }
     }

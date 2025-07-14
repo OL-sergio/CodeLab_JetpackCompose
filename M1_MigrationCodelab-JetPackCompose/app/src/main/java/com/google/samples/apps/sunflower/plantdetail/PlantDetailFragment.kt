@@ -65,7 +65,7 @@ class PlantDetailFragment : Fragment() {
 
                 setContent {
                     SunflowerTheme {
-                        PlantDetailDescriptionScreen(plantDetailViewModel)
+                        PlantDetailDescriptionScreen(plantDetailViewModel,{}, {})
                     }
                 }
                 setViewCompositionStrategy(
@@ -90,7 +90,7 @@ class PlantDetailFragment : Fragment() {
             viewModel = plantDetailViewModel
             lifecycleOwner = viewLifecycleOwner
 
-            toolbar.setNavigationOnClickListener { view ->
+           /* toolbar.setNavigationOnClickListener { view ->
                 view.findNavController().navigateUp()
             }
 
@@ -102,7 +102,7 @@ class PlantDetailFragment : Fragment() {
                     }
                     else -> false
                 }
-            }
+            }*/
         setHasOptionsMenu(true)
 
         }
