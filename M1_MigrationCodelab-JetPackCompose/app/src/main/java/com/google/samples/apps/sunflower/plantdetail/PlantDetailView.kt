@@ -16,30 +16,47 @@
 package com.google.samples.apps.sunflower.plantdetail
 
 
+
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.text.method.LinkMovementMethod
-import android.widget.ImageButton
 import android.widget.TextView
+import androidx.compose.animation.animateBounds
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.updateTransition
+
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -57,7 +74,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -80,10 +99,13 @@ import com.google.samples.apps.sunflower.data.Plant
 import com.google.samples.apps.sunflower.theme.SunflowerTheme
 import com.google.samples.apps.sunflower.viewmodels.PlantDetailViewModel
 
+
 data class PlantDetailsCallbacks(
     val onFabClick: () -> Unit,
     val onBackClick: () -> Unit,
-    val onShareClick: (String) -> Unit
+    val onShareClick: (String) -> Unit,
+    val onGalleryClick: (Plant) -> Unit
+
 )
 
 
@@ -92,6 +114,7 @@ fun PlantDetailDescriptionScreen(
     plantDetailViewModel: PlantDetailViewModel,
     onBackClick: () -> Unit,
     onShareClick: (String) -> Unit,
+    onGalleryClick: (Plant) -> Unit,
 ) {
     val plant =  plantDetailViewModel.plant.observeAsState().value
     val isPlanted = plantDetailViewModel.isPlanted.observeAsState().value
@@ -100,12 +123,12 @@ fun PlantDetailDescriptionScreen(
         Surface {
             PlantDetails(
                 plant,
-                isPlanted as Boolean,
+                isPlanted,
                 PlantDetailsCallbacks(
                     onFabClick = { plantDetailViewModel.addPlantToGarden() },
                     onBackClick = onBackClick,
-                    onShareClick = onShareClick
-
+                    onShareClick = onShareClick,
+                    onGalleryClick = onGalleryClick,
                 ),
             )
         }
@@ -113,18 +136,49 @@ fun PlantDetailDescriptionScreen(
 }
 
 @Composable
-fun PlantDetails(
+private fun PlantDetails(
     plant: Plant,
     isPlanted: Boolean,
     callbacks: PlantDetailsCallbacks,
     modifier: Modifier = Modifier,
     ) {
+
+    val scrollState = rememberScrollState()
+    var plantScroller by remember {
+        mutableStateOf(PlantDetailScroller(scrollState, Float.MIN_VALUE))
+    }
+
+    val transitionState = remember(plantScroller) { plantScroller.toolbarTransitionState }
+    val toolbarState = plantScroller.getToolbarState(LocalDensity.current)
+
+
+    val transition = rememberTransition(transitionState, label = "")
+    val toolbarAlpha by transition.animateFloat(
+        transitionSpec = { spring(stiffness = Spring.StiffnessLow) }, label = ""
+    ) { toolbarTransitionState ->
+        if (toolbarTransitionState == ToolbarState.HIDDEN) 1f else 0f
+    }
+
+    val contentAlpha by transition.animateFloat(
+        transitionSpec = { spring(stiffness = Spring.StiffnessLow) }, label = ""
+    ) { toolbarTransitionState ->
+        if (toolbarTransitionState == ToolbarState.HIDDEN) 1f else 0f
+    }
+
     Box (
         modifier.fillMaxSize()
     ){
         PlantDetailContent(
+            scrollState = scrollState,
             plant = plant,
             isPlanted = isPlanted,
+            toolbarState = toolbarState,
+            onNamePosition = { newNamePosition ->
+                if ( plantScroller.namePosition == Float.MIN_VALUE ) {
+                    plantScroller = plantScroller.copy(namePosition = newNamePosition)
+                }
+            },
+
             imageHeight = with(LocalDensity.current) {
                 val candidateHeight =
                     Dimens.PlantDetailAppBarHeight
@@ -132,27 +186,33 @@ fun PlantDetails(
                 // is released
                 maxOf(candidateHeight, 1.dp)
             },
-
             onFabClick = callbacks.onFabClick,
-
+            onGalleryClick = { callbacks.onGalleryClick(plant) },
+            contentAlpha = { contentAlpha }
         )
         PlantToolbar(
-           plant.name, callbacks,
-
-
+            toolbarState, plant.name, callbacks,
+            toolbarAlpha = { toolbarAlpha },
+            contentAlpha = { contentAlpha }
         )
     }
 }
 
 @Composable
-fun PlantDetailContent(
+private fun PlantDetailContent(
+    scrollState: ScrollState,
     plant: Plant,
-    imageHeight: Dp,
     isPlanted: Boolean,
+    toolbarState: ToolbarState,
+    onNamePosition: (Float) -> Unit,
+    imageHeight: Dp,
     onFabClick: () -> Unit,
+    onGalleryClick: () -> Unit,
+    contentAlpha: () -> Float,
     ) {
-
-    Column( ) {
+    Column(
+        Modifier.verticalScroll(scrollState)
+    ) {
             ConstraintLayout {
                 val (image, info , fab) = createRefs()
 
@@ -161,6 +221,7 @@ fun PlantDetailContent(
                     imageHeight = imageHeight,
                     modifier = Modifier
                         .constrainAs(image) { top.linkTo(parent.top) }
+                        .alpha(contentAlpha())
                 )
 
                 if(!isPlanted) {
@@ -177,26 +238,30 @@ fun PlantDetailContent(
                                     margin = fabEndMargin
                                 )
                             }
-
+                            .alpha(contentAlpha())
                     )
                 }
-
                 PlantInformation(
                     name = plant.name,
                     wateringInterval = plant.wateringInterval,
                     description = plant.description,
+                    toolbarState = toolbarState,
+                    onNamePosition = { onNamePosition (it) },
+                    onGalleryClick = onGalleryClick,
                     modifier = Modifier.constrainAs(info) { top.linkTo(image.bottom) }
                 )
-
             }
     }
 }
 
 @Composable
-fun PlantInformation(
+private fun PlantInformation(
     name: String,
     wateringInterval: Int,
     description: String,
+    toolbarState: ToolbarState,
+    onNamePosition: (Float) -> Unit,
+    onGalleryClick: () -> Unit,
     modifier: Modifier = Modifier)
     {
         Column (modifier = modifier.padding(Dimens.PaddingLarge)) {
@@ -204,13 +269,13 @@ fun PlantInformation(
                 text = name,
                 style = MaterialTheme.typography.displaySmall,
                 modifier = Modifier
-
                     .padding(
                         start = Dimens.PaddingSmall,
                         end = Dimens.PaddingSmall,
                         bottom = Dimens.PaddingNormal
                     )
                     .align(Alignment.CenterHorizontally)
+
             )
 
             Box(
@@ -225,11 +290,14 @@ fun PlantInformation(
                 Column(
                     Modifier.fillMaxWidth()
                 ) {
+
                     Text(
                         text = stringResource(id = R.string.watering_needs_prefix),
-                        style = MaterialTheme.typography.bodyMedium,
+
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        modifier = Modifier
+                            .padding(horizontal = Dimens.PaddingSmall)
+                            .align(Alignment.CenterHorizontally)
                     )
 
                     val wateringIntervalText = pluralStringResource(
@@ -240,6 +308,14 @@ fun PlantInformation(
                         text = wateringIntervalText,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
+
+                    /*Image(
+                        painter = painterResource(id = R.drawable.ic_photo_library),
+                        contentDescription = "Gallary Icon",
+                        Modifier
+                            .clickable { onGalleryClick() }
+                            .align(Alignment.End)
+                    )*/
                 }
             }
             PlantDescription(description)
@@ -247,8 +323,11 @@ fun PlantInformation(
 }
 @Composable
 fun PlantToolbar(
+    toolbarState: ToolbarState,
     plantName: String,
     callbacks: PlantDetailsCallbacks,
+    toolbarAlpha: () -> Float,
+    contentAlpha: () -> Float
 
 ) {
 
@@ -256,24 +335,26 @@ fun PlantToolbar(
         callbacks.onShareClick(plantName)
     }
 
-    PlantDetailsToolbar(
+    if (toolbarState.isShown){
+        PlantDetailsToolbar(
 
-        plantName = plantName,
-        onBackClick = callbacks.onBackClick,
-        onShareClick = onShareClick,
-        modifier = Modifier
+            plantName = plantName,
+            onBackClick = callbacks.onBackClick,
+            onShareClick = onShareClick,
+            modifier = Modifier.alpha(toolbarAlpha())
 
-    )
-    PlantHeaderActions(
+        )
+    }else {
 
-        onBackClick = callbacks.onBackClick,
-        onShareClick = onShareClick,
-        modifier = Modifier
+        PlantHeaderActions(
+            onBackClick = callbacks.onBackClick,
+            onShareClick = onShareClick,
+            modifier = Modifier.alpha(contentAlpha())
 
-    )
-
-
+        )
+    }
 }
+
 
 @Composable
 private fun PlantHeaderActions(
@@ -341,13 +422,11 @@ private fun PlantDetailsToolbar(
     onShareClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-
     Surface {
         TopAppBar(
                 modifier = modifier
                     .statusBarsPadding()
-                    .background(color = MaterialTheme.colorScheme.surface ),
-
+                    .background(color = MaterialTheme.colorScheme.surface),
                 title = {
                     Row{
                         IconButton(
@@ -358,9 +437,31 @@ private fun PlantDetailsToolbar(
                                 Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(id = R.string.a11y_back)
                             )
-
                         }
-
+                        Text(
+                            text = plantName,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .wrapContentSize(Alignment.Center)
+                                .weight(1f)
+                        )
+                        
+                        val shareContentDescription =
+                            stringResource(R.string.menu_item_share_plant)
+                        IconButton(
+                            onShareClick,
+                            Modifier
+                                .align(Alignment.CenterVertically)
+                                .semantics {
+                                    contentDescription = shareContentDescription
+                                }
+                        ) {
+                            Icon(
+                                Icons.Filled.Share,
+                                contentDescription = null
+                            )
+                        }
                     }
                 }
             )
@@ -381,7 +482,7 @@ private fun PlantImage(
     Box(
         modifier
             .fillMaxWidth()
-            .height(200.dp)
+            .height(imageHeight)
     ) {
         GlideImage(
             model = imageUrl,
@@ -426,8 +527,9 @@ private fun PlantDescription(description: String) {
     AndroidView(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Dimens.PaddingNormal),
-
+                .padding(
+                    start = 8.dp, top = 16.dp, end = 8.dp, bottom = 56.dp
+                ),
 
         factory = { context ->
                     TextView(context).apply {
@@ -469,17 +571,9 @@ private fun PlantDetailDescriptionScreenPreview() {
             PlantDetails(
                 Plant("plantId", "Tomato", "HTML<br>description", 6),
                 true,
-                PlantDetailsCallbacks({ }, { }, { } )
+                PlantDetailsCallbacks({ }, { }, { }, { }, )
                 )
         }
-    }
-}
-
-@Preview
-@Composable
-private fun PlantDescriptionPreview() {
-    MaterialTheme {
-        PlantDescription("HTML<br><br>description")
     }
 }
 
