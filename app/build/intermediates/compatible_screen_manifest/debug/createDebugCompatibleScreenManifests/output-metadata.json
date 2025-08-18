@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "COMPATIBLE_SCREEN_MANIFEST",
+    "kind": "Directory"
+  },
+  "applicationId": "com.google.tutorial_jetpack_compose.codelab.codelab_jetpackcompose",
+  "variantName": "debug",
+  "elements": []
+}

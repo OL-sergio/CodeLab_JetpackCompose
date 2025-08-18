@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.google.tutorial_jetpack_compose.codelab.codelab_jetpackcompose.app-debug-4:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.google.tutorial_jetpack_compose.codelab.codelab_jetpackcompose.app-main-6:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.google.tutorial_jetpack_compose.codelab.codelab_jetpackcompose.app-debug-4:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.google.tutorial_jetpack_compose.codelab.codelab_jetpackcompose.app-main-6:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.google.tutorial_jetpack_compose.codelab.codelab_jetpackcompose.app-debug-4:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.google.tutorial_jetpack_compose.codelab.codelab_jetpackcompose.app-main-6:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.google.tutorial_jetpack_compose.codelab.codelab_jetpackcompose.app-debug-4:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.google.tutorial_jetpack_compose.codelab.codelab_jetpackcompose.app-main-6:/mipmap-xxhdpi/ic_launcher.webp"
+    }
+]
