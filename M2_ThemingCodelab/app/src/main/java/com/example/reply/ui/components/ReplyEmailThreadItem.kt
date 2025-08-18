@@ -16,6 +16,7 @@
 
 package com.example.reply.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.reply.R
 import com.example.reply.data.Email
@@ -47,10 +49,17 @@ fun ReplyEmailThreadItem(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(18.dp)
+            .background(
+                MaterialTheme.colorScheme.background,
+                MaterialTheme.shapes.medium
+            )
             .padding(20.dp)
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+
+        ) {
             ReplyProfileImage(
                 drawableResource = email.sender.avatar,
                 description = email.sender.fullName,
@@ -58,14 +67,18 @@ fun ReplyEmailThreadItem(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                    .padding(horizontal = 12.dp, vertical = 4.dp ,),
+
                 verticalArrangement = Arrangement.Center
             ) {
+
                 Text(
                     text = email.sender.firstName,
+                    style = MaterialTheme.typography.labelMedium,
                 )
                 Text(
                     text = stringResource(id = R.string.twenty_mins_ago),
+                    style = MaterialTheme.typography.labelMedium
                 )
             }
             IconButton(
@@ -83,21 +96,25 @@ fun ReplyEmailThreadItem(
 
         Text(
             text = email.subject,
+            style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 12.dp, bottom = 8.dp),
         )
 
         Text(
             text = email.body,
+            maxLines = 2,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 20.dp),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Button(
                 onClick = { /*Click Implementation*/ },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f),
             ) {
                 Text(
                     text = stringResource(id = R.string.reply),
