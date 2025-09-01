@@ -33,6 +33,7 @@ import com.example.compose.rally.ui.components.StatementBody
  */
 @Composable
 fun BillsScreen(
+
     bills: List<Bill> = remember { UserData.bills }
 ) {
     StatementBody(
