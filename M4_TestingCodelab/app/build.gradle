@@ -22,17 +22,21 @@ plugins {
 
 android {
     namespace "com.example.compose.rally"
-    compileSdkVersion 35
+    compileSdkVersion 36
 
     defaultConfig {
         applicationId "com.example.compose.rally"
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 36
         versionCode 1
         versionName '1.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
         vectorDrawables.useSupportLibrary = true
+
+        testInstrumentationRunner "org.junit.platform.runner.JUnitPlatformRunner"
+
+
     }
 
     signingConfigs {
@@ -46,8 +50,10 @@ android {
     }
 
     buildTypes {
+
         debug {
             signingConfig signingConfigs.debug
+
         }
 
         release {
@@ -66,32 +72,39 @@ android {
     }
 
     buildFeatures {
-        compose true
+        compose = true
 
         // Disable unused AGP features
-        buildConfig false
-        aidl false
-        renderScript false
-        resValues false
-        shaders false
+        buildConfig = false
+        aidl = false
+        renderScript  = false
+        resValues = false
+        shaders = false
+    }
+    packagingOptions {
+        jniLibs {
+            excludes += ['META-INF/licenses/**']
+        }
+        resources {
+            excludes += ['META-INF/licenses/**', 'META-INF/AL2.0', 'META-INF/LGPL2.1']
+        }
     }
 
-    packagingOptions {
-        exclude "META-INF/licenses/**"
-        exclude "META-INF/AL2.0"
-        exclude "META-INF/LGPL2.1"
+    testOptions {
+        unitTests.returnDefaultValues = true
     }
+
 }
 
 dependencies {
-    def composeBom = platform('androidx.compose:compose-bom:2025.05.00')
+    def composeBom = platform('androidx.compose:compose-bom:2025.08.01')
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
-    implementation "androidx.appcompat:appcompat:1.7.0"
-    implementation "androidx.core:core-ktx:1.16.0"
+    implementation "androidx.appcompat:appcompat:1.7.1"
+    implementation "androidx.core:core-ktx:1.17.0"
     implementation "com.google.android.material:material:1.12.0"
-    implementation "androidx.fragment:fragment-ktx:1.8.6"
+    implementation "androidx.fragment:fragment-ktx:1.8.9"
 
     // Compose
     implementation "androidx.compose.runtime:runtime"
@@ -108,8 +121,8 @@ dependencies {
 
     // Testing dependencies
     androidTestImplementation "androidx.arch.core:core-testing:2.2.0"
-    androidTestImplementation "androidx.test.espresso:espresso-contrib:3.6.1"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.6.1"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:3.7.0"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.7.0"
 
     // Compose testing dependencies
     androidTestImplementation "androidx.compose.ui:ui-test"
