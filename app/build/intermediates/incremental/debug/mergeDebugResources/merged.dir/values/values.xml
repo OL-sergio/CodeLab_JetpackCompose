@@ -204,6 +204,8 @@
         <enum name="chain" value="1"/>
         <enum name="aligned" value="2"/>
     </attr>
+    <attr format="string" name="fontProviderSystemFontFamily"/>
+    <attr format="string" name="fontVariationSettings"/>
     <attr format="integer" name="framePosition"/>
     <attr format="reference" name="headerLayout"/>
     <attr format="dimension" name="height"/>
@@ -10753,7 +10755,7 @@
             <enum name="forever" value="-1"/>
         </attr>
         
-        <attr format="string" name="fontProviderSystemFontFamily"/>
+        <attr name="fontProviderSystemFontFamily"/>
     </declare-styleable>
     <declare-styleable name="FontFamilyFont">
         
@@ -10766,7 +10768,7 @@
         
         <attr format="integer" name="fontWeight"/>
         
-        <attr format="string" name="fontVariationSettings"/>
+        <attr name="fontVariationSettings"/>
         
         <attr format="integer" name="ttcIndex"/>
         
@@ -10775,6 +10777,14 @@
         <attr name="android:fontWeight"/>
         <attr name="android:fontVariationSettings"/>
         <attr name="android:ttcIndex"/>
+    </declare-styleable>
+    <declare-styleable name="FontFamilyProviderFallback">
+        
+        <attr name="fontProviderQuery"/>
+        
+        <attr name="fontProviderSystemFontFamily"/>
+        
+        <attr name="fontVariationSettings"/>
     </declare-styleable>
     <declare-styleable name="ForegroundLinearLayout">
     <attr name="android:foreground"/>
