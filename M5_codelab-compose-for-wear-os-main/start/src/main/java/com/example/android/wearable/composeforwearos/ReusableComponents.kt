@@ -16,18 +16,37 @@
 package com.example.android.wearable.composeforwearos
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Message
+import androidx.compose.material.icons.rounded.Phone
+import androidx.compose.material.icons.rounded.SelfImprovement
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
+import androidx.wear.compose.material.AppCard
+import androidx.wear.compose.material.Icon
+import androidx.wear.compose.material.ListHeader
+import androidx.wear.compose.material3.AppCard
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.Button
+import androidx.wear.compose.material3.FilledIconButton
+import androidx.wear.compose.material3.ListHeader
+import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.ScreenScaffold
+import androidx.wear.compose.material3.SurfaceTransformation
+import androidx.wear.compose.material3.SwitchButton
 import androidx.wear.compose.material3.Text
+import androidx.wear.compose.material3.lazy.rememberTransformationSpec
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.example.android.wearable.composeforwearos.theme.WearAppTheme
 import com.google.android.horologist.compose.layout.ColumnItemType
@@ -40,11 +59,34 @@ import com.google.android.horologist.compose.layout.rememberResponsiveColumnPadd
 fun IconButtonExample(
     modifier: Modifier = Modifier,
 ) {
+    FilledIconButton(
+        onClick = { /* Do something */ },
+        modifier = modifier,
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.Phone,
+            contentDescription = "triggers phone action"
+        )
+    }
 }
 
 // TODO: Create a Text Composable
 @Composable
-fun TextExample(modifier: Modifier = Modifier) {
+fun TextExample(
+    modifier: Modifier = Modifier,
+    transformation: SurfaceTransformation,
+) {
+    ListHeader(
+        modifier = modifier,
+        transformation = transformation,
+    ){
+        Text(
+            modifier = modifier,
+            textAlign = TextAlign.Center,
+            text = stringResource(R.string.hello_compose_codelab),
+        )
+    }
+
 }
 
 // TODO: Create a Card (specifically, an AppCard) Composable
@@ -52,19 +94,78 @@ fun TextExample(modifier: Modifier = Modifier) {
 fun CardExample(
     modifier: Modifier = Modifier,
     iconModifier: Modifier = Modifier,
+    transformation: SurfaceTransformation,
 ) {
+    AppCard(
+        modifier = modifier,
+        transformation = transformation,
+        appImage = {
+            Icon(
+                imageVector = Icons.Rounded.Message,
+                contentDescription = "triggers phone action",
+                modifier = iconModifier,
+            )
+        },
+        appName = { Text("Message") },
+        time = { Text("12m") },
+        title = { Text("Kim Green") },
+        onClick = { /* Do something */ },
+
+    ){
+        Text("On my way!")
+    }
 }
 
 // TODO: Create a Chip Composable
 @Composable
 fun ChipExample(
     modifier: Modifier = Modifier,
+    transformation: SurfaceTransformation,
 ) {
+    Button(
+        modifier = modifier,
+        transformation = transformation,
+        onClick = { /* Do something */ },
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.SelfImprovement,
+                contentDescription = "triggers phone action"
+            )
+        },
+    ) {
+        Text(
+            text = "5 minute Meditation",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 }
 
 // TODO: Create a Chip with a switch Composable
 @Composable
-fun SwitchChipExample(modifier: Modifier = Modifier) {
+fun SwitchChipExample(
+    modifier: Modifier = Modifier,
+    transformation: SurfaceTransformation,
+) {
+    var checked by remember { mutableStateOf(true) }
+    SwitchButton(
+        modifier = modifier.fillMaxSize(),
+        transformation = transformation,
+        label = {
+            Text(
+                "Sound",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.semantics{
+                    this.contentDescription = if (checked) "Sound on" else "Sound off"
+                },
+            )
+        },
+        checked = checked,
+        onCheckedChange = { checked = it },
+        enabled = true,
+    )
+
 }
 
 // Function only used as a demo for when you start the code lab (removed as step 1).
@@ -73,6 +174,7 @@ fun StartOnlyTextComposables() {
     Text(
         modifier = Modifier.fillMaxSize(),
         textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.primary,
         text = stringResource(R.string.hello_world_starter),
     )
 }
@@ -129,6 +231,7 @@ fun ButtonExamplePreview() {
 fun TextExamplePreview() {
     WearAppTheme {
         AppScaffold {
+            val transformationSpec = rememberTransformationSpec()
             val listState = rememberTransformingLazyColumnState()
             val contentPadding =
                 rememberResponsiveColumnPadding(first = ColumnItemType.BodyText)
@@ -138,7 +241,9 @@ fun TextExamplePreview() {
             ) { contentPadding ->
                 TransformingLazyColumn(state = listState, contentPadding = contentPadding) {
                     item {
-                        TextExample()
+                        TextExample(
+                            transformation = SurfaceTransformation(transformationSpec)
+                        )
                     }
                 }
             }
@@ -152,6 +257,7 @@ fun TextExamplePreview() {
 fun CardExamplePreview() {
     WearAppTheme {
         AppScaffold {
+            val transformationSpec = rememberTransformationSpec()
             val listState = rememberTransformingLazyColumnState()
             val contentPadding =
                 rememberResponsiveColumnPadding(first = ColumnItemType.Card)
@@ -161,7 +267,7 @@ fun CardExamplePreview() {
             ) { contentPadding ->
                 TransformingLazyColumn(state = listState, contentPadding = contentPadding) {
                     item {
-                        CardExample()
+                        CardExample(transformation = SurfaceTransformation(transformationSpec))
                     }
                 }
             }
@@ -175,6 +281,7 @@ fun CardExamplePreview() {
 fun ChipPreview() {
     WearAppTheme {
         AppScaffold {
+            val transformationSpec = rememberTransformationSpec()
             val listState = rememberTransformingLazyColumnState()
             val contentPadding =
                 rememberResponsiveColumnPadding(first = ColumnItemType.Button)
@@ -184,7 +291,7 @@ fun ChipPreview() {
             ) { contentPadding ->
                 TransformingLazyColumn(state = listState, contentPadding = contentPadding) {
                     item {
-                        ChipExample()
+                        ChipExample(transformation = SurfaceTransformation(transformationSpec))
                     }
                 }
             }
@@ -197,6 +304,7 @@ fun ChipPreview() {
 @Composable
 fun SwitchChipExamplePreview() {
     WearAppTheme {
+        val transformationSpec = rememberTransformationSpec()
         AppScaffold {
             val listState = rememberTransformingLazyColumnState()
             val contentPadding =
@@ -207,7 +315,7 @@ fun SwitchChipExamplePreview() {
             ) { contentPadding ->
                 TransformingLazyColumn(state = listState, contentPadding = contentPadding) {
                     item {
-                        SwitchChipExample()
+                        SwitchChipExample(transformation = SurfaceTransformation(transformationSpec))
                     }
                 }
             }

@@ -18,20 +18,26 @@ package com.example.android.wearable.composeforwearos
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
+import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.AppScaffold
+import androidx.wear.compose.material3.EdgeButton
+import androidx.wear.compose.material3.EdgeButtonSize
 import androidx.wear.compose.material3.ScreenScaffold
-import androidx.wear.compose.material3.ScreenScaffoldDefaults.contentPadding
+import androidx.wear.compose.material3.SurfaceTransformation
+import androidx.wear.compose.material3.Text
+import androidx.wear.compose.material3.lazy.rememberTransformationSpec
+import androidx.wear.compose.material3.lazy.transformedHeight
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
 import com.example.android.wearable.composeforwearos.theme.WearAppTheme
+import com.google.android.horologist.compose.layout.ColumnItemType
+import com.google.android.horologist.compose.layout.rememberResponsiveColumnPadding
 
 /**
  * This code lab is meant to help existing Compose developers get up to speed quickly on
@@ -63,45 +69,77 @@ fun WearApp() {
     WearAppTheme {
         /* *************************** Part 4: Wear OS Scaffold *************************** */
         // TODO (Start): Create a AppScaffold (Wear Version)
+        AppScaffold {
+            // TODO: Swap to TransformingLazyColumnState
+            val listState = rememberTransformingLazyColumnState()
+            val transformationSpec = rememberTransformationSpec()
+            /* *************************** Part 4: Wear OS Scaffold *************************** */
+            // TODO (Start): Create a ScreenScaffold (Wear Version)
+            ScreenScaffold (
+                scrollState = listState,
+                contentPadding = rememberResponsiveColumnPadding(
+                    first = ColumnItemType.IconButton,
+                    last = ColumnItemType.Button,
+                ),
+                edgeButton = {
+                    EdgeButton(
+                        onClick = { /* ... */ },
+                        buttonSize = EdgeButtonSize.Medium
+                    ) {
+                        Text(stringResource(R.string.more))
+                    }
+                }
 
-        // TODO: Swap to TransformingLazyColumnState
-        val listState = rememberLazyListState()
+            ) { contentPadding ->
 
-        /* *************************** Part 4: Wear OS Scaffold *************************** */
-        // TODO (Start): Create a ScreenScaffold (Wear Version)
+                /* *************************** Part 3: ScalingLazyColumn *************************** */
+                // TODO: Swap a TransformingLazyColumn (Wear's version of LazyColumn)
+                TransformingLazyColumn(
+                    state = listState,
+                    contentPadding = contentPadding,
+                ) {
+                    /* ******************* Part 1: Simple composables ******************* */
+                    item {
+                        IconButtonExample()
+                    }
 
-        /* *************************** Part 11: EdgeButton *************************** */
-        // TODO: Add a EdgeButton
+                    item {
+                        TextExample(
+                            modifier =
+                                Modifier.fillMaxWidth().transformedHeight(this, transformationSpec),
+                            transformation = SurfaceTransformation(transformationSpec),
+                        )
+                    }
 
-        /* *************************** Part 3: ScalingLazyColumn *************************** */
-        // TODO: Swap a TransformingLazyColumn (Wear's version of LazyColumn)
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                top = 32.dp,
-                start = 8.dp,
-                end = 8.dp,
-                bottom = 32.dp,
-            ),
-            verticalArrangement = Arrangement.Center,
-            state = listState,
-        ) {
-            // TODO: Remove item; for beginning only.
-            item { StartOnlyTextComposables() }
+                    item {
+                            CardExample(
+                            modifier =
+                                Modifier.fillMaxWidth().transformedHeight(this, transformationSpec),
+                            transformation = SurfaceTransformation(transformationSpec),
+                        )
+                    }
 
-            /* ******************* Part 1: Simple composables ******************* */
-            item { IconButtonExample() }
-            item { TextExample() }
-            item { CardExample() }
+                    /* ********************* Part 2: Wear unique composables ********************* */
+                    item { ChipExample(
+                            modifier =
+                                Modifier.fillMaxWidth().transformedHeight(this, transformationSpec),
+                            transformation = SurfaceTransformation(transformationSpec),
+                        )
+                    }
 
-            /* ********************* Part 2: Wear unique composables ********************* */
-            item { ChipExample() }
-            item { SwitchChipExample() }
+                    item { SwitchChipExample(
+                            modifier =
+                                Modifier.fillMaxWidth().transformedHeight(this, transformationSpec),
+                            transformation = SurfaceTransformation(transformationSpec),
+                        )
+                    }
+
+                }
+                // TODO (End): Create a ScreenScaffold (Wear Version)
+            }
+            // TODO (End): Create a AppScaffold (Wear Version)
         }
-
-        // TODO (End): Create a ScreenScaffold (Wear Version)
     }
-    // TODO (End): Create a AppScaffold (Wear Version)
 }
 
 @WearPreviewDevices

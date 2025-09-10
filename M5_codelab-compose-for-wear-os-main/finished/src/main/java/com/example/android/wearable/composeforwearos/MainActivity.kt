@@ -101,14 +101,12 @@ fun WearApp() {
                     }
                 },
             ) { contentPadding ->
-
                 /* *************************** Part 3: ScalingLazyColumn *************************** */
                 // TODO: Swap a TransformingLazyColumn (Wear's version of LazyColumn)
                 /*
                  * TransformingLazyColumn applies padding for elements in the list to
                  * make sure no elements are clipped on different screen sizes.
                  * */
-
                 TransformingLazyColumn(
                     state = listState,
                     contentPadding = contentPadding,
